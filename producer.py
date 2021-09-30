@@ -23,14 +23,14 @@ class ProducerClient(object):
         if self.corr_id == props.correlation_id:
             self.response = json.loads(body)
 
-    def crawl(self, n):
+    def call(self, n):
 
         self.response = None
         self.corr_id = str(uuid.uuid4())
 
         self.channel.basic_publish(
             exchange='',
-            routing_key='crawler',
+            routing_key='rpc_queue',
             properties=pika.BasicProperties(
                 reply_to=self.callback_queue,
                 correlation_id=self.corr_id,
@@ -43,5 +43,6 @@ class ProducerClient(object):
             self.connection.process_data_events()
 
         data = self.response
+        print(self.response)
 
         return data

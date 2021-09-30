@@ -1,7 +1,6 @@
 import pika
 import json
 import pandas as pd
-from crawler import crawler
 
 try:
     parameters = pika.ConnectionParameters(host='localhost')
@@ -9,13 +8,13 @@ try:
 
     channel = connection.channel()
 
-    channel.queue_declare(queue='crawler')
+    channel.queue_declare(queue='rpc_queue')
 
     def on_request(ch, method, props, body):
 
         data = json.loads(body)
 
-        result = crawler(data)
+        print(data)
 
         ch.basic_publish(
             exchange='',
@@ -25,16 +24,16 @@ try:
                 content_type="application/json",
                 delivery_mode=2
             ),
-            body=json.dumps(result)
+            body=json.dumps(data)
         )
 
         ch.basic_ack(delivery_tag=method.delivery_tag)
 
     channel.basic_qos(prefetch_count=2)
 
-    channel.basic_consume(queue='crawler', on_message_callback=on_request)
+    channel.basic_consume(queue='rpc_queue', on_message_callback=on_request)
 
-    print("[x] Awaiting Crawler Tasks")
+    print("[x] Awaiting rpc_queue Tasks")
     channel.start_consuming()
 
 except KeyboardInterrupt:
