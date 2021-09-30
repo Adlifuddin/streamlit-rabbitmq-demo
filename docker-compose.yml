@@ -1,0 +1,35 @@
+version: "3.7"
+services:
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: 'rabbitmq'
+    ports:
+        - 5672:5672
+        - 15672:15672
+    volumes:
+        - ./rabbitmq/etc/definitions.json:/etc/rabbitmq/definitions.json
+        - ./rabbitmq/etc/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
+        - ./rabbitmq/data:/var/lib/rabbitmq/mnesia/rabbit@my-rabbit
+        - ./rabbitmq/logs:/var/log/rabbitmq/log
+
+  app:
+    build:
+      context: .
+    restart: always
+    container_name: "app"
+    ports:
+      - "8501:8501"
+
+  selenium:
+    image: selenium/standalone-chrome
+    container_name: "selenium"
+    ports:
+      - 4000:4000
+  
+  crawler:
+    build:
+      context: crawler
+    container_name: "crawler"
+    restart: always
+    ports:
+      - "4100:4100"
